@@ -42,18 +42,18 @@ A self-hosted tool that records Discord voice calls and turns them into text tra
 
 ## Status
 - Bot: ?record and ?stop (prefix via COMMAND_PREFIX in .env; needs Message Content intent). Tested in a live 40 s call with 1 speaker: 4 clips, DAVE decrypt clean (0 decode errors). Not yet tested with 2+ speakers or a 1 to 2 hour call.
-- Pipeline: step 1 mostly done. requirements.txt pinned and installed in .venv (Python 3.13). Whisper large-v3 downloaded to models/faster-whisper-large-v3 (2.9 GB). Still to do in step 1: a helper that adds the nvidia/*/bin DLL dirs from site-packages via os.add_dll_directory (Windows needs this for CUDA), load the model from the local path with HF_HUB_OFFLINE=1, and a GPU smoke test on one clip from recordings/.
+- Pipeline: steps 1-5 done. Run: `.venv\Scripts\python -m pipeline <recording folder | OBS file> [--language en] [--out transcripts] [--audio-track 0]`. Writes transcripts/<name>.md.
+  - model.py: load_model() adds the nvidia/*/bin DLL dirs (Windows CUDA), sets HF_HUB_OFFLINE=1, loads models/faster-whisper-large-v3 on cuda/float16. `python -m pipeline.smoke_test [clip]` checks the GPU on one clip.
+  - stitch.py: one 16 kHz mono WAV per speaker in recordings/<session>/tracks/, clips placed at startMs. Crash-tolerant: skips a half-written last line in segments.jsonl, recovers .ogg clips missing from it (startMs from the file name), skips undecodable clips.
+  - transcribe.py: beam 5, Silero VAD, no_speech 0.6, log_prob -1.0, compression_ratio 2.4, language defaults to en.
+  - merge.py: sorts all speakers' lines; joins consecutive same-speaker lines into one turn unless more than 30 s apart.
+  - __main__.py: OBS files go through ffmpeg (audio track 0 by default) and are labeled "Speaker".
+  - Tested on the 40 s bot recording, a synthetic OBS .mkv, and a synthetic 2-speaker session with endedAt null and a missing segments line.
 
-## Next steps (the user may say "do 1-5")
-Decided: keep the bot's per-utterance clips as raw capture and do all grouping and noise filtering in the pipeline. Don't filter or drop clips in the bot: short clips can be real words ("yeah", "no").
+## Decisions
+Keep the bot's per-utterance clips as raw capture and do all grouping and noise filtering in the pipeline. Don't filter or drop clips in the bot: short clips can be real words ("yeah", "no"). Whole per-speaker tracks give Whisper context; 2 s clips make it hallucinate.
 
-1. Python setup: requirements.txt with pinned faster-whisper, install into .venv with CUDA support, download Whisper large-v3 into models/.
-2. Stitch: pipeline/stitch.py reads session.json + segments.jsonl and places each speaker's clips on one continuous 16 kHz mono WAV track at their startMs. Whole tracks give Whisper context; 2 s clips make it hallucinate.
-3. Transcribe: pipeline/transcribe.py runs faster-whisper large-v3 on the GPU per speaker track, with vad_filter (Silero) to skip non-speech and hallucination guards (no_speech_threshold, log_prob_threshold, compression_ratio_threshold).
-4. Merge + output: combine all speakers by timestamp, join back-to-back lines from the same speaker into one turn, write transcripts/<session>.md as "[HH:MM:SS] Name: text".
-5. CLI: `python -m pipeline <recording folder | OBS .mkv/.mp4>`. OBS files: ffmpeg extracts audio to one mixed track, labeled "Speaker" for now.
-
-Later:
-6. Accuracy check: hand-correct a 5 minute sample, measure word accuracy, tune settings until at least 90%.
-7. Live tests: a call with 2+ speakers, then a 1 to 2 hour call.
-8. Optional: make the bot private (Installation > Install Link: None, then Bot > Public Bot off); speaker labels for mixed OBS audio (whisperx/pyannote).
+## Next steps
+1. Accuracy check: hand-correct a 5 minute sample, measure word accuracy, tune settings until at least 90%.
+2. Live tests: a call with 2+ speakers, then a 1 to 2 hour call.
+3. Optional: make the bot private (Installation > Install Link: None, then Bot > Public Bot off); speaker labels for mixed OBS audio (whisperx/pyannote).
