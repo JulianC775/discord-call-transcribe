@@ -1,0 +1,9 @@
+# Transcription pipeline (Python). Install: .venv\Scripts\python -m pip install -r requirements.txt
+faster-whisper==1.2.1
+ctranslate2==4.8.2
+huggingface_hub==1.33.0
+onnxruntime==1.30.0
+av==18.1.0
+# CUDA 12 + cuDNN 9 runtime for ctranslate2 on the GPU
+nvidia-cublas-cu12==12.9.2.10
+nvidia-cudnn-cu12==9.26.0.51

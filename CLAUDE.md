@@ -42,7 +42,7 @@ A self-hosted tool that records Discord voice calls and turns them into text tra
 
 ## Status
 - Bot: ?record and ?stop (prefix via COMMAND_PREFIX in .env; needs Message Content intent). Tested in a live 40 s call with 1 speaker: 4 clips, DAVE decrypt clean (0 decode errors). Not yet tested with 2+ speakers or a 1 to 2 hour call.
-- Pipeline: not started. .venv exists (Python 3.13, pip installed) with nothing else installed.
+- Pipeline: step 1 mostly done. requirements.txt pinned and installed in .venv (Python 3.13). Whisper large-v3 downloaded to models/faster-whisper-large-v3 (2.9 GB). Still to do in step 1: a helper that adds the nvidia/*/bin DLL dirs from site-packages via os.add_dll_directory (Windows needs this for CUDA), load the model from the local path with HF_HUB_OFFLINE=1, and a GPU smoke test on one clip from recordings/.
 
 ## Next steps (the user may say "do 1-5")
 Decided: keep the bot's per-utterance clips as raw capture and do all grouping and noise filtering in the pipeline. Don't filter or drop clips in the bot: short clips can be real words ("yeah", "no").
