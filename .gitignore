@@ -216,3 +216,37 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ---- Project-specific ----
+# (.env, .cache, *.log already covered by the Python template above)
+
+# Secrets / config
+*.token
+config.local.*
+
+# Recordings (bot output + Streamlabs OBS files)
+recordings/
+*.wav
+*.mp3
+*.ogg
+*.opus
+*.flac
+*.m4a
+*.pcm
+*.mkv
+*.mp4
+*.flv
+*.mov
+
+# Transcripts (private conversations)
+transcripts/
+
+# Whisper / Hugging Face model caches and weights
+models/
+*.pt
+*.bin
+*.safetensors
+
+# Logs / scratch
+logs/
+tmp/
