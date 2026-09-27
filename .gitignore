@@ -250,3 +250,6 @@ models/
 # Logs / scratch
 logs/
 tmp/
+
+# Node (bot)
+node_modules/
